@@ -119,6 +119,31 @@ if yes?("Do you need me to setup RSpec?")
   remove_dir 'test'
 end
 
+# create validation partial
+file 'app/views/shared/_validation_errors.html.erb', <<-EOF
+<div data-test='validation-errors'>
+  <ul>
+    <% object.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>
+EOF
+
+# create flash partial
+file 'app/views/shared/_flash.html.erb', <<-EOF
+<% %w(notice alert).each do |type| %>
+  <% if flash[type] %>
+    <div data-test="flash-<%= type %>"><%= flash[type] %></div>
+  <% end %>
+<% end %>
+EOF
+
+# add flash partial to layout
+inject_into_file 'app/views/layouts/application.html.erb', <<-EOF, :after => /<body>.*$\n/
+    <%= render partial: 'shared/flash' %>
+EOF
+
 # install gems
 run 'bundle install'
 
